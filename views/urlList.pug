@@ -1,0 +1,11 @@
+doctype html
+head
+  title Shortened Url
+  link(href='https://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css')
+  link(href='/public/style.css' rel='stylesheet' type='text/css')
+.container
+  h2 List of shortened Urls
+  ul 
+    each val, key in result
+      li
+        a(href= val.link) #{val.link}

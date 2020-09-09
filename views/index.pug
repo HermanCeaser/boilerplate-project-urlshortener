@@ -1,0 +1,48 @@
+doctype html
+head
+  title URL Shortener
+  link(rel='shortcut icon' href='https://cdn.hyperdev.com/us-east-1%3A52a203ff-088b-420f-81be-45bf559d01b1%2Ffavicon.ico' type='image/x-icon')
+  link(href='https://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css')
+  link(href='/public/style.css' rel='stylesheet' type='text/css')
+.container
+  h2 API Project: URL Shortener Microservice
+  h3 User Story: 
+  ol
+    li
+      | I can POST a URL to 
+      code [project_url]/api/shorturl/new
+      |  and I will receive a shortened URL in the JSON response.
+      br
+      | Example : 
+      code {&quot;original_url&quot;:&quot;www.google.com&quot;,&quot;short_url&quot;:1}
+    li
+      | If I pass an invalid URL that doesn&apos;t follow the 
+      code http(s)://www.example.com(/more/routes)
+      |  format, the JSON response will contain an error like 
+      code {&quot;error&quot;:&quot;invalid URL&quot;}
+      br
+      |           HINT: to be sure that the submitted url points to a valid site you can use the function 
+      code dns.lookup(host, cb)
+      |  from the 
+      code dns
+      |  core module.
+    li When I visit the shortened URL, it will redirect me to my original link.
+  h3 Short URL Creation 
+  p
+    | example: 
+    code POST [project_url]/api/shorturl/new
+    |  - 
+    code https://www.google.com
+  form(action='api/shorturl/new' method='POST')
+    label(for='url_input') URL to be shortened
+    input#url_input(type='text' name='url' value='https://www.freecodecamp.org')
+    input(type='submit' value='POST URL')
+  h3 Example Usage:
+  a(href='https://url-shortener.freecodecamp.repl.co/api/shorturl/3')
+    | [this_project_url]/api/shorturl/3
+  h3 Will Redirect to:
+  p https://forum.freecodecamp.org/
+.footer
+  p
+    | by 
+    a(href='https://www.freecodecamp.org') freeCodeCamp

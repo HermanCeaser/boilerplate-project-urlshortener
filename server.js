@@ -6,6 +6,7 @@ var mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const dns = require('dns');
 const crypto = require('crypto');
+const pug = require('pug');
 
 var cors = require('cors');
 
@@ -32,12 +33,15 @@ app.use(bodyParser.json());
 
 app.use('/public', express.static(process.cwd() + '/public'));
 
+app.set('views', './views');
+app.set('view engine', 'pug');
+
 app.get('/', function(req, res) {
-  res.sendFile(process.cwd() + '/views/index.html');
+  res.render('index');
 });
 
 // Url Model...
-const Url = require('./models/urlModel');
+const {UrlModel, saveUrl, findUrls} = require('./models/urlModel');
 
 // Check Connection
 app.get("/is-mongoose-ok", function(req, res) {
@@ -51,6 +55,34 @@ app.get("/is-mongoose-ok", function(req, res) {
 //Function to create a hash
 const hash = x => crypto.createHash('sha256').update(x, 'utf8').digest('hex');
 
+// return all the urls from the database
+app.get("/api/shorturl/", function(req, res){
+  findUrls((err, data)=>{
+    if(err) return console.log("Unable to get urls")
+    if(!data){
+      console.log("Missing Done argument");
+    }
+
+    const result = data.map(function(x){
+      return Object.assign({
+      link: `https://${req.headers.host}/api/shorturl/${x.hash}`}, x)
+    });
+
+    console.log(result);
+    res.render('urlList', {result});
+  });
+})
+
+app.get("/api/shorturl/:hashed_url", function(req, res){
+  const url = req.params.hashed_url;
+  if(url){
+    UrlModel.findOne({hash: url}, (err, data) => {
+      if(err) return console.log(err);
+      console.log(data.url);
+      res.redirect(302, `http://${data.url}`);
+    })
+  }
+})
 // your first API endpoint... 
 app.post("/api/shorturl/new", function(req, res) {
   if(!req.body.url){
@@ -65,8 +97,14 @@ app.post("/api/shorturl/new", function(req, res) {
       return res.json({"error": "invalid URL"});
     }
 
-    const short_url = new Url({url: original_url, hash: hash(url)});
-    res.json({ "original_url": original_url, "short_url": short_url.hash.slice(0,10) })
+    const short_url = new UrlModel({url: original_url, hash: hash(url).slice(0, 10)});
+
+    saveUrl(short_url, (err, data)=>{
+      if(err) return console.log("could not save the url: " + err);
+      res.json({ "original_url": data.url, "short_url": data.hash });
+    });
+
+    //res.json({ "original_url": original_url, "short_url": short_url.hash })
   })
 });
 
